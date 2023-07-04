@@ -1,1 +1,3 @@
-# Yato-s-Notes
+# dailyNote
+
+> 机会是需要把握的，每天比之前进步一点，自勉
