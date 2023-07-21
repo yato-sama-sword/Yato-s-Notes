@@ -1,10 +1,10 @@
 # 架构知识
 
-> 其实组件不止下述这些，个人编写简易Spring以及简易SpringMvc项目中略过了一些非必要但也很重要的模块。想快速了解可以看看[Spring FrameWork 5](https://pdai.tech/md/spring/spring-x-framework-introduce.html)专栏，鱼皮大大写的。想深入了解的话推荐看陈雄华老师在电子工业出版社出版的Spring有关书籍，讲的很细，日后希望可以详读。
+本节先对Spring Framework进行简单的介绍。想深入了解的话推荐看陈雄华老师在电子工业出版社出版的Spring有关书籍，讲的很细，日后希望可以详读。
 
 ## Core Container
 
-> 实现其他模块的基础，由Beans模块、Core核心模块、Context上下文模块和SpEL表达式语言模块组成。想在项目中实现AOP等功能必须仰赖于该模块。下面介绍一下SpEL模块外的三个模块
+**实现其他模块的基础**，由Beans模块、Core核心模块、Context上下文模块和SpEL表达式语言模块组成。想在项目中实现AOP等功能必须仰赖于该模块。下面介绍一下SpEL模块外的三个模块
 
 - **Beans 模块**：提供了框架的基础部分，包括控制反转和依赖注入。
 - **Core 核心模块**：封装了 Spring 框架的底层部分，包括资源访问、类型转换及一些常用工具类。
@@ -12,11 +12,11 @@
 
 ## Aspects
 
-> 提供与 AspectJ 的集成，是一个功能强大且成熟的面向切面编程（AOP）框架。（和Spring AOP实现上没有关系，只是Spring可以集成AspectJ，使用相关方法）
+提供与 AspectJ 的集成，是一个功能强大且成熟的面向切面编程（AOP）框架。（和Spring AOP实现上没有关系，只是Spring可以集成AspectJ，使用相关方法）
 
 ## IOC
 
-> 控制反转，反转的是依赖对象的获取。由容器创建对象并且进行管理（在合适的时候注入），取代了本来由我们自己创建获取对象的操作。在Spring Boot中使用@Autowired注解就搞定对象注入，在项目中得深入看看背后的过程了。
+控制反转，反转的是依赖对象的获取。由容器创建对象并且进行管理（在合适的时候注入），取代了本来由我们自己创建获取对象的操作。在Spring Boot中使用@Autowired注解就搞定对象注入，在项目中得深入看看背后的过程了。
 
 ### 配置方式
 
@@ -26,9 +26,9 @@
 
 ### 依赖注入方式
 
-1. 构造方法注入：正如其名，在调用构造函数时，实现依赖对象的注入
-2. setter注入：正如其名，使用set方法实现依赖对象注入
-3. 注解注入：使用`@Autowired`注解进行注入
+1. 构造方法注入：在调用构造函数时，实现依赖对象的注入
+2. setter注入：使用set方法实现依赖对象注入
+3. 注解注入：使用`@Autowired、@Resourced`等注解进行注入
 
 官方推荐构造方法注入，既保证注入组件不可变，又确保需要的依赖不为空，这里就得看下具体的注入方法了
 
@@ -51,8 +51,6 @@ public class ServiceImpl {
 
 ### 整体功能
 
-> 总体来说功能如下图所示嘞：
-
 ![IOC功能](笔记.assets\spring-framework-ioc-source-7.png)
 
 1. 加载Bean配置：对不同类型资源的加载（比如xml配置文件），解析成生成统一Bean的配置（Bean容器，对Bean进行定义和行为管理）
@@ -62,15 +60,15 @@ public class ServiceImpl {
 
 ### 体系结构
 
-> 主要分为三大块！：
-> 
-> 1. BeanFactory和BeanRegistry：定义IOC容器功能规范和Bean的注册
-> 2. BeanDefinition：定义各种Bean对象及其相互的关系
-> 3. ApplicationContext：IOC容器的接口类，在基本IoC容器实现基础上实现访问资源、国际化、应用事件等功能
+主要分为三大块：
+
+1. BeanFactory和BeanRegistry：定义IOC容器功能规范和Bean的注册
+2. BeanDefinition：定义各种Bean对象及其相互的关系
+3. ApplicationContext：IoC容器的接口类，在基本IoC容器实现基础上实现访问资源、国际化、应用事件等功能
 
 #### BeanFactory
 
-> 列出实现的方法如下：
+在BeanFactory主要实现**创建Bean**的方法
 
 1. 根据bean名字和Class类型来获得bean实例
 2. 返回指定bean的Provider
@@ -82,19 +80,17 @@ public class ServiceImpl {
 
 #### BeanRegistry
 
-> Spring配置文件中的每一个`bean`在Spring容器中都会通过BeanDefinition对象表示。BeanDefinitionRegistry接口提供向容器手工注册BeanDefinition对象的方法
+Spring配置文件中的每一个`bean`在Spring容器中都会通过BeanDefinition对象表示。BeanDefinitionRegistry接口提供向容器手工注册BeanDefinition对象的方法
 
 #### BeanDefinition
 
-> 对Bean对象和对象间关系进行定义，相关的还有BeanDefinitionReader（BeanDefinition的解析器，完成对Spring配置文件的解析），BeanDefinitionHolder（eanDefination的包装类，用来存储BeanDefinition，name以及aliases等）
+对Bean对象和对象间关系进行定义，相关的还有BeanDefinitionReader（BeanDefinition的解析器，完成对Spring配置文件的解析），BeanDefinitionHolder（eanDefination的包装类，用来存储BeanDefinition，name以及aliases等）
 
 #### ApplicationContext
 
-> 继承自BeanFactory，实现定义基础Bean容器功能基础上额外拓展处理特殊Bean的能力，内含Bean工厂、应用事件、资源加载、国际化相关接口，有众多的扩展实现。
+继承自BeanFactory，实现定义基础Bean容器功能基础上额外拓展处理特殊Bean的能力，内含Bean工厂、应用事件、资源加载、国际化相关接口，有众多的扩展实现。
 
 #### 总结
-
-> 分析完之后，鱼皮大大的架构图可以对应相关模块如下
 
 ![spring-framework-ioc-source-71](笔记.assets\spring-framework-ioc-source-71.png)
 
@@ -102,9 +98,7 @@ public class ServiceImpl {
 
 ### 初始化流程
 
-Spring IoC容器载入定义资源从refresh()函数开始
-
-> Spring实现将资源配置通过加载、解析、生成BeanDefinition注册到IoC容器（**本质上是存放BeanDefinition的ConcurrentHashMap<String,Object>**）的过程
+Spring IoC容器载入定义资源从refresh()函数开始，将资源配置通过加载、解析、生成BeanDefinition注册到IoC容器（**本质上是存放BeanDefinition的ConcurrentHashMap<String,Object>**）的过程
 
 **从源码上看，具体实现为**
 
@@ -133,8 +127,6 @@ Spring IoC容器载入定义资源从refresh()函数开始
    3. 实现BeanDefinitionRegistry接口将BeanDefinition注册到IoC容器中
 3. 通过BeanFactory和ApplicationContext使用Spring的IoC服务
 
-> 这里补充一下关于模板方法模式的一些知识
-> 
 > **模板方法是一个算法骨架，是一系列调用的基本方法，而基本方法可以分为：**
 > 
 > 1. 抽象方法：声明但未实现
@@ -152,7 +144,7 @@ Spring IoC容器载入定义资源从refresh()函数开始
 
 #### getBean(String name)
 
-> 具体流程体现在**getBean**方法，注意的是Spring进行Bean实例化时：会确保依赖也被初始化。根据beanDefinition的信息（单例、原型、bean的scope）有三种不同的创建bean实例方法。
+实例化的具体流程体现在**getBean**方法，在Bean实例化的过程中，会确保依赖也被初始化（循环依赖出现的原因之一）。根据beanDefinition的信息（单例、原型、bean的scope）有三种不同的创建bean实例方法。
 
 **大概的流程是**：
 
@@ -219,7 +211,7 @@ Spring IoC容器载入定义资源从refresh()函数开始
 
 ## AOP
 
-> 提供了面向切面编程实现，提供比如日志记录、权限控制、性能统计等通用功能和业务逻辑分离的技术，并且能动态的把这些功能添加到需要的代码中，这样各司其职，降低业务逻辑和通用功能的耦合。
+提供了面向切面编程实现，提供比如日志记录、权限控制、性能统计等通用功能和业务逻辑分离的技术，并且能动态的把这些功能添加到需要的代码中，这样各司其职，降低业务逻辑和通用功能的耦合。
 
 简单来说，Spring实现AOP通过动态代理。而动态代理呢，又可以分为JDK、Cglib几种
 
@@ -229,9 +221,11 @@ JDK的动态代理的缺点是只能对接口作代理，其原理是反射。
 
 # 实现思路
 
-> 整个项目的切入点都是从`getBean()`开始的，在获取Bean的时候需要执行实例化、属性填充、初始化操作，不再使用Bean时需要执行销毁操作。这些操作是通过什么实现的？此外Bean是如何存放在容器中的？容器是怎么样的？如何实现对Bean功能的动态增强(AOP)等等就在下文慢慢说道
+> 整个项目的切入点都是从`getBean()`开始的，在获取Bean的时候需要执行实例化、属性填充、初始化操作，不再使用Bean时需要执行销毁操作。这些操作是通过什么实现的？此外Bean是如何存放在容器中的？容器是怎么样的？如何实现对Bean功能的动态增强(AOP)等等就在下文慢慢说道。
 
 ## IOC
+
+在IoC的概念没有这么深入Java程序员之心的时候，可以说
 
 ### 1.实现简易的Bean容器
 
@@ -257,7 +251,7 @@ Bean工厂提供Bean获取方法，并由AbstratBeanFactory抽象类进行实现
 
 ### 3.提供对象实例化策略
 
-如果是对于没有属性的bean来说(大部分常见bean都是无参的)，通过beanClass.newInstance就已经完成任务了，但是对于有属性的bean而言，实例化分成两种流派，各有千秋
+如果是对于没有属性的bean来说(大部分常见bean都是无属性的)，通过beanClass.newInstance就已经完成任务了，但是对于有属性的bean而言，实例化分成两种流派，各有千秋
 
 1. 无参构造：不用获取Constructor，直接创建实例，对于jdk而言是newInstance，对于cglib而言是enhancer.create
 2. 有参构造：需要获取对应的Constructor，通过对应的构造器来进行实例化
@@ -272,7 +266,7 @@ Bean工厂提供Bean获取方法，并由AbstratBeanFactory抽象类进行实现
 
 callback可以认为是cglib生成字节码的实现手段，一共可以分为6种
 
-1. MethodInterceptor：类似于环绕增强
+1. MethodInterceptor：类似于环绕增强，在目标前后围着一段执行的代码
 2. FixedValue：替换源方法的返回值
 3. InvocationHandler：用于自定义实现，类似于MethodInterceptor
 4. LazyLoader：单例类的延迟生成代理
@@ -293,17 +287,7 @@ callback可以认为是cglib生成字节码的实现手段，一共可以分为6
 
 > 一般来说Spring有配置文件就可以实例化bean，不用手动创建。所以我们需要一个资源解析器，可以读取classpath、本地文件、云文件中的配置内容(xml)，并且可以对配置文件进行解析，将Bean对象注册到Spring容器中
 
-**实现**：首先是定义资源和资源解析器。具体来说实现有classpath资源、文件系统资源和Url资源，资源解析器的默认实现负责读取这三种资源。随后实现对xml文件的解析，主要是根据读取标签相关值，根据标签名进行相应处理，生成bean元信息(beanDefinition)
-
-#### org.w3c.dom
-
-org.w3c.dom为DOM(文档对象模型)提供接口
-
-Document(文档树模型)则可以表示整个HTML或XML文档
-
-Node是DOM中的基本对象，代表文档树的抽象节点(标签啦)
-
-Element是Node类最主要的子对象，可以存取属性
+**实现**：首先是定义资源和资源解析器。具体来说实现有classpath资源、文件系统资源和Url资源，资源解析器的默认实现负责读取这三种资源。随后实现对xml文件的解析，主要是根据读取标签相关值，根据标签名进行相应处理，生成bean元信息(beanDefinition)。
 
 #### CharSequence
 
@@ -716,25 +700,19 @@ FactoryBean让实现接口的Bean获取自己创建对象的能力，体现工�
 
 > 保证每次获取的都是相同的对象
 
-比较经典的是双重校验锁模式：volatile + synchronized
+比较经典的是双重校验锁模式：volatile + synchronized。但是双重校验锁模式并不那么安全，可能被反序列化所破坏
 
-**使用**：
-
-getSingleton方法获取的就是单例对象，保证每次获取的都是一样的bean！hash值什么的完全一样！
+getSingleton方法获取的就是单例对象，保证每次获取的都是一样的bean
 
 ### 适配器模式
 
 > 提供一种拟合能力，可以让本不能调用某一方法或不适合的类能够调用该方法
-
-**使用**：
 
 销毁方法多种，是AbstractApplicationContext注册虚拟机之后，虚拟机关闭之前执行的动作。在销毁方法执行时不关注底层的具体实现，通过统一接口进行销毁，于是使用适配器`DisposableBeanAdaptor`，实现统一的处理，让其他类可以轻松调用
 
 ### 观察者模式
 
 > 解耦，一个对象状态发生改变时候，所有依赖于它的对象都得到通知并被自动更新
-
-**使用**：
 
 在Event事件功能中提供的事件定义、发布、监听事件完成自定义动作！可以掌握自己的信息
 

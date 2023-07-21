@@ -1,6 +1,6 @@
 # Collection
 
-> Java中的Collection由List、Set、Queue组成，这里把Map也放在当前目录下，是因为目录表示的集合而非Collection接口！在Java中Map是单独的接口哦
+> Java中的Collection由List、Set、Queue组成，这里把Map也放在当前目录下，是因为目录表示的集合而非Collection接口！在Java中Map是单独的接口
 
 肯定要思考一个问题，什么情况下用什么集合
 
@@ -857,13 +857,13 @@ Parallel Scavenge 收集器**关注点是吞吐量（高效率的利用 CPU）**
 
 ### 1.进程与线程的基本概念
 
-> **背景知识**：一开始的计算机是用户输入指令，对应计算机执行一个操作，效率相当低下。在引入批处理操作系统后，用户可以把一系列需要进行操作的指令写下来，形成一个清单，一次性交给计算机，计算机一次性执行所有操作。**但是，批处理操作系统的指令运行方式仍然是串行的，内存中始终只有一个程序在运行。**
+> **背景知识**：批处理操作系统的指令运行方式仍然是串行的，内存中始终只有一个程序在运行
 
 #### 基本概念
 
 内存中能不能有多个程序同时运行？如何同时运行？这里引入进程的概念
 
-**进程是应用程序在内存中分配的空间，也就是正在运行的程序。**塔噶，在一开始CPU是采用时间片轮转的方式来运行进程，CPU会为每个进程分配一个时间段。这个时候从宏观上来看，一个大的时间片内同时有多个任务在执行，但是**实际上对于单核CPU而言，具体时刻下还是只有一个任务能够使用CPU资源。**并且，如果一个进程有多个子任务，也只能逐个执行，效率低下
+**进程是应用程序在内存中分配的空间，也就是正在运行的程序。**在一开始CPU是采用时间片轮转的方式来运行进程，CPU会为每个进程分配一个时间段。这个时候从宏观上来看，一个大的时间片内同时有多个任务在执行，但是**实际上对于单核CPU而言，具体时刻下还是只有一个任务能够使用CPU资源。**并且，如果一个进程有多个子任务，也只能逐个执行，效率低下
 
 有没有可能，一个进程可以同时执行多个子任务呢？这里引入线程的概念
 
@@ -892,7 +892,17 @@ Parallel Scavenge 收集器**关注点是吞吐量（高效率的利用 CPU）**
 >
 > **上下文是指某一时间点CPU寄存器和程序计数器的内容**
 
-寄存器是cpu内部的闪存，通常存储计算过程的中间值
+寄存器是cpu内部的少量的速度很快的闪存，通常存储和访问计算过程的中间值提高计算机程序的运行速度。
+
+程序计数器是一个专用的寄存器，用于表明指令序列中 CPU 正在执行的位置，存的值为正在执行的指令的位置或者下一个将要被执行的指令的位置，具体实现依赖于特定的系统。
+
+举例说明 线程A - B
+
+1.先挂起线程A，将其在cpu中的状态保存在内存中。
+
+2.在内存中检索下一个线程B的上下文并将其在 CPU 的寄存器中恢复,执行B线程。
+
+3.当B执行完，根据程序计数器中指向的位置恢复线程A。
 
 程序计数器在JVM内存结构中也有提到类似的，会指示CPU正在执行的位置，存储正在执行指令位置或即将执行指令位置
 
@@ -997,24 +1007,20 @@ class TaskTest implements Callable<Integer> {
 
 FuturTask的任务运行状态
 
-```java
-/**
-  *
-  * state可能的状态转变路径如下：
+1. **NEW（新建）**：`FutureTask`对象刚被创建时的初始状态。此时任务还没有被执行。
+2. **COMPLETING（正在完成）**：任务正在执行或已经执行完成，但还没有返回结果。
+3. **NORMAL（正常）**：任务已经执行完成，并且成功返回了结果。
+4. **EXCEPTIONAL（异常）**：任务执行过程中发生了异常。
+5. **CANCELLED（已取消）**：任务被取消。
+6. **INTERRUPTING（正在中断）**：任务正在被中断。
+7. **INTERRUPTED（已中断）**：任务已经被中断。
+
+state可能的状态转变路径如下：
+
   * NEW -> COMPLETING -> NORMAL
   * NEW -> COMPLETING -> EXCEPTIONAL
   * NEW -> CANCELLED
   * NEW -> INTERRUPTING -> INTERRUPTED
-  */
-private volatile int state;
-private static final int NEW          = 0;
-private static final int COMPLETING   = 1;
-private static final int NORMAL       = 2;
-private static final int EXCEPTIONAL  = 3;
-private static final int CANCELLED    = 4;
-private static final int INTERRUPTING = 5;
-private static final int INTERRUPTED  = 6;
-```
 
 ### 3.线程组和线程优先级
 
@@ -1066,16 +1072,18 @@ public enum State {
 2. RUNNABLE：表示当前线程正在运行中。处于RUNNABLE状态的线程在Java虚拟机中运行，也有可能在等待其他系统资源（比如I/O）(一眼可以看出包含ready和waiting两个状态)
 3. BLOCKED：阻塞状态。处于BLOCKED状态的线程正等待锁的释放以进入同步区。
 4. WAITING：等待状态。处于等待状态的线程变成RUNNABLE状态需要其他线程唤醒。进入WAITING状态可以调用如下三个方法
-	1. Object.wait()：使当前线程处于等待状态直到另一个线程唤醒它；
-	2. Thread.join()：等待线程执行完毕，底层调用的是Object实例的wait方法；
-	3. LockSupport.park()：除非获得调用许可，否则禁用当前线程进行线程调度。  
+  1. Object.wait()：使当前线程处于等待状态直到另一个线程唤醒它；
+  2. Thread.join()：等待线程执行完毕，底层调用的是Object实例的wait方法；
+  3. LockSupport.park()：除非获得调用许可，否则禁用当前线程进行线程调度。  
 5. TIMED_WAITING：超时等待状态。线程等待一个具体的时间，时间到后会被自动唤醒。调用如下方法会使线程进入超时等待状态
-	1. hread.sleep(long millis)：使当前线程睡眠指定时
-	2. Object.wait(long timeout)：线程休眠指定时间，等待期间可以通过notify()/notifyAll()唤醒；
-	3. Thread.join(long millis)：等待当前线程最多执行millis毫秒，如果millis为0，则会一直执行；
-	4. LockSupport.parkNanos(long nanos)： 除非获得调用许可，否则禁用当前线程进行线程调度指定时间
-	5. LockSupport.parkUntil(long deadline)：同上，也是禁止线程进行调度指定时间；
+  1. hread.sleep(long millis)：使当前线程睡眠指定时
+  2. Object.wait(long timeout)：线程休眠指定时间，等待期间可以通过notify()/notifyAll()唤醒；
+  3. Thread.join(long millis)：等待当前线程最多执行millis毫秒，如果millis为0，则会一直执行；
+  4. LockSupport.parkNanos(long nanos)： 除非获得调用许可，否则禁用当前线程进行线程调度指定时间
+  5. LockSupport.parkUntil(long deadline)：同上，也是禁止线程进行调度指定时间；
 6. TERMINATED：终止状态。此时线程已执行完毕。
+
+**只有New状态下的线程可以调用start方法**
 
 由上不难得出线程状态的转换图：
 
@@ -1478,9 +1486,9 @@ public void blockLock() {
 
 1. 偏向锁：偏向锁会偏向于第一个访问锁的线程，如果在接下来的运行过程中，该锁没有被其他的线程访问，则持有偏向锁的线程将永远不需要触发同步。也就是说，**偏向锁在资源无竞争情况下消除了同步语句，连CAS操作都不做了，提高了程序的运行性能。**
 
-	> 大白话就是对锁置个变量，如果发现为true，代表资源无竞争，则无需再走各种加锁/解锁流程。如果为false，代表存在其他线程竞争资源，那么就会走后面的流程。
+  > 大白话就是对锁置个变量，如果发现为true，代表资源无竞争，则无需再走各种加锁/解锁流程。如果为false，代表存在其他线程竞争资源，那么就会走后面的流程。
 
-	注意撤销偏向锁的开销比较大
+  （随着实际应用场景的变化，偏向锁的效果并不总是理想的。在多线程竞争激烈的情况下，偏向锁的撤销和重置操作会带来额外的性能开销，可能会影响整体的性能表现。另外，偏向锁对于一些具有短暂同步块的对象来说，也可能不太适用。因为在这种情况下，偏向锁的撤销和重置操作可能比获取和释放锁的开销更大，导致性能下降。在Java15中，偏向锁被移除）
 
 2. 轻量级锁：线程通过适应性自旋的方法获取锁，简单来说就是线程如果自旋成功了，则下次自旋的次数会更多，如果自旋失败了，则自旋的次数就会减少。
 
@@ -1605,7 +1613,7 @@ compareAndSetState()
 
 AQS类本身实现的是一些排队和阻塞的机制，比如具体线程等待队列的维护（如获取资源失败入队/唤醒出队等）。它内部使用了一个先进先出（FIFO）的双端队列，并使用了两个指针head和tail用于标识队列的头部和尾部。
 
-![img](C:\Users\yato\Desktop\U know wt\interviewPre\dailyNote\笔记.assets\AQS数据结构.png)
+![img](笔记.assets\AQS数据结构.png)
 
 本身不直接存储线程，而是存储拥有线程的Node节点
 
@@ -1675,7 +1683,7 @@ AQS基于模板方法实现，主要的方法有
 
 #### aquire方法
 
-![img](C:\Users\yato\Desktop\U know wt\interviewPre\dailyNote\笔记.assets\acquire流程.jpg)
+![img](笔记.assets\acquire流程.jpg)
 
 
 
@@ -1771,3 +1779,156 @@ TimeUnit是一个枚举类型 ，包括以下属性：
 1. put和take操作都需要**先获取锁**，没有获取到锁的线程会被挡在第一道大门之外自旋拿锁，直到获取到锁。
 2. 就算拿到锁了之后，也**不一定**会顺利进行put/take操作，需要判断**队列是否可用**（是否满/空），如果不可用，则会被阻塞，**并释放锁**。
 3. 在第2点被阻塞的线程会被唤醒，但是在唤醒之后，**依然需要拿到锁**才能继续往下执行，否则，自旋拿锁，拿到锁了再while判断队列是否可用（这也是为什么不用if判断，而使用while判断的原因）。
+
+# Java8
+
+## Lambda
+
+可以使用函数式接口进行实现，常见的语法如下
+
+```java
+Comparator<Person> c = (Person p1, Person p2) -> p1.getAge().compareTo(p2.getAge());
+Comparator<Person> c = Comparator.comparing(Person::getAge);
+```
+
+## Stream
+
+> 对集合对象功能的增强，适合聚合操作，并行操作等。
+>
+> 参考博文链接：https://blog.csdn.net/yy339452689/article/details/110956119
+
+将Stream的操作分为两大类：中间操作、终结操作
+
+其中中间操作可分为：
+
+1. 无状态（Stateless）操作：指元素的处理不受之前元素的影响
+2. 有状态（Stateful）操作：指该操作只有拿到所有元素之后才能继续下去
+
+终结操作可分为：
+
+1. 短路（Short-circuiting）操作：指遇到某些符合条件的元素就可以得到最终结果
+2. 非短路（Unshort-circuiting）操作：指必须处理完所有元素才能得到最终结果
+
+![img](深入Java.assets/Stream操作类型.png)
+
+而流本身主要分为两种，其一是顺序流Stream，其二是parallelStream.stream是顺序流，由主线程对流进行操作，而parrallelStream是并行流,内部以多线程并行执行的方式对流执行操作。
+
+**注意**，使用并行流会导致乱序，如果有顺序要求，则不能使用并行流。
+
+## Optional
+
+> 使用链式方法替代传统的if判空的使用情况居多
+
+### ifPresent方法
+
+ifPresent表示Optional 中的对象存在才会执行后续代码
+
+```java
+public void testIfPresent() {
+    // 
+ 
+    List<String> dataList = new ArrayList<>();
+ 
+    // 1. 不为空没有值的集合
+    Optional.ofNullable(dataList)
+            .ifPresent(t -> {
+                System.out.println("1"); // 输出 1
+                t.forEach(a -> System.out.println(a));
+            });
+}
+```
+
+### fileter方法
+
+filter方法常常用于过滤不符合条件的值，会设计一个预期值，当符合条件时会返回Optional实例，否则返回空
+
+```java
+private static List<User> userList = new ArrayList<>();
+ 
+/**
+ * 初始化 user 集合
+ */
+@Before
+public void initEveryTestBefore() {
+    userList.add(new User(22, "王旭", "wang.xu","123456", '1', true));
+    userList.add(new User(21, "孙萍", "sun.ping","a123456", '2', false));
+    userList.add(new User(23, "步传宇", "bu.zhuan.yu", "b123456", '1', false));
+    userList.add(new User(18, "蔡明浩",  "cai.ming.hao","c123456", '1', true));
+    userList.add(new User(17, "郭林杰", "guo.lin.jie", "d123456", '1', false));
+    userList.add(new User(29, "韩凯", "han.kai", "e123456", '1', true));
+    userList.add(new User(22, "韩天琪",  "han.tian.qi","f123456", '2', false));
+    userList.add(new User(21, "郝玮",  "hao.wei","g123456", '2', false));
+    userList.add(new User(19, "胡亚强",  "hu.ya.qing","h123456", '1', false));
+    userList.add(new User(14, "季恺",  "ji.kai","i123456", '1', false));
+    userList.add(new User(17, "荆帅",  "jing.shuai","j123456", '1', true));
+    userList.add(new User(16, "姜有琪",  "jiang.you.qi","k123456", '1', false));
+    logger.info("initEveryTestBefore, size {}", userList.size());
+}
+
+@Test
+public void testFilter() {
+    // 1. 在集合中有年龄大于 18 岁的才会返回所有对象
+    Optional.ofNullable(userList)
+            .filter(t -> t.stream().anyMatch(u -> u.getAge() > 18))
+            .ifPresent(t -> {
+                t.forEach(u -> {
+                    System.out.println("1:" + u.toString());
+                });
+            });
+ 
+    // 2. 因为集合中没有年龄大于 50 岁的，因此不会返回任何对象
+    Optional.ofNullable(userList)
+            .filter(t -> t.stream().anyMatch(u -> u.getAge() > 50))
+            .ifPresent(t -> {
+                t.forEach(u -> {
+                    System.out.println("2:" + u.toString());
+                });
+            });
+}
+```
+
+### map方法
+
+map 方法是链式调用避免空指针的核心方法, 当实例包含值时, 对值执行传入的 Function 逻辑, 并返回一个代表结果值的新的 Optional 实例；也就是将 optional 中的对象转成 其他对象，或者修改对象中的属性
+
+```java
+// 1. 返回 optional 中的对象年龄在 18 岁以上的
+Optional.ofNullable(userList)
+        .map(t -> {
+            List<User> tempList = new ArrayList<>();
+            t.forEach(u -> {
+                if (u.getAge() > 18) {
+                    tempList.add(u);
+                }
+            });
+            return tempList;
+        })
+        .ifPresent(t -> {
+            t.forEach(u -> {
+                System.out.println("1:" + u.toString());
+            });
+        });
+```
+
+### flatMap方法
+
+flatMap方法是将 optional 中的对象转成 optional 对象，或者修改对象中的属性；与map方法类似。不同之处在于：
+
+```java
+Optional.ofNullable(userList)
+        .map(t -> {
+            List<User> tempList = new ArrayList<>();
+            t.forEach(u -> {
+                if (u.getAge() > 18) {
+                    tempList.add(u);
+                }
+            });
+ 
+            //不同之处
+            return Optional.of(tempList);
+        })
+```
+
+## Collector
+
+一般来说是配合Stream使用的
